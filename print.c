@@ -1,6 +1,6 @@
 #include "apc.h"
 
-void print_list(Dlist *head)
+void print_list(Calc *head)
 {
 	/* Cheking the list is empty or not */
 	if (head == NULL)
@@ -9,17 +9,14 @@ void print_list(Dlist *head)
 	}
 	else
 	{
-	    printf("Head -> ");
 	    while (head)		
 	    {
 		    /* Printing the list */
-		    printf("%d <-", head -> data);
+		    printf("%d", head -> data);
 
-		    /* Travering in forward direction */
+		    /* Traversing in forward direction */
 		    head = head -> next;
-		    if (head)
-		        printf("> ");
 	    }
-    	printf(" Tail\n");
+    	printf("\n");
     }
 }

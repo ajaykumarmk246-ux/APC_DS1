@@ -3,13 +3,19 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
-typedef enum{
+#define SWAP 1
+#define NOSWAP 0
+
+typedef enum
+{
     e_success,
     e_failure
-}Status;
+} Status;
 
-typedef enum{
+typedef enum
+{
     e_addition,
     e_subtraction,
     e_multiplication,
@@ -17,35 +23,69 @@ typedef enum{
     e_unsupported
 }OperationType;
 
-
-typedef struct Node
+typedef struct calc
 {
     int data;
-    struct Node *prev;
-    struct Node *next;
+    struct calc *prev;
+    struct calc *next;
 
+}Calc;
 
-}Dlist;
+typedef struct
+{
+    Calc *head;
+    Calc *tail;
+} Dlist;
 
+/* Create List for Operand */
+Status create_list(Dlist *list, char str[]);
+
+/* Check Operation type */
 OperationType check_operation_type(char opt);
 
-Status insert_last(Dlist **head, Dlist **tail,int data);
+/* Insert at last in the list */
+Status insert_last(Dlist *list, int data);
 
-Status insert_first(Dlist **head, Dlist **tail,int data);
+/* Insert at first in the list */
+Status insert_first(Dlist *list, int data);
 
-void print_list(Dlist *head);
+/* Print the list(Result) */
+void print_list(Calc *head);
 
-Status addition(Dlist **head1, Dlist **head2, Dlist **tail1,Dlist **tail2);
+/* Extern keyword for Sign */
+extern int result_negative;
 
+/* Addition Operation */
+Status addition(Dlist *list1, Dlist *list2);
 
-Status subtraction(Dlist **head1, Dlist **head2, Dlist **tail1,Dlist **tail2);
+/* Subtraction Operation */
+Status subtraction(Dlist *list1, Dlist *list2, int data);
 
-int list_compare(Dlist *head1,Dlist *head2);
+/* Remove leading Zeros */
+void remove_leading_zeroes(Dlist* list);
 
-int data_compare(Dlist *head1,Dlist *head2);
+/* Compare Lists , First Operand digits count greater than second */
+int list_compare(Dlist *list1, Dlist *list2);
 
-void swap_list(Dlist **head1,Dlist **head2,Dlist **list1,Dlist **list2);
+/* Compare the data which is greater */
+int data_compare(Calc *head1, Calc *head2);
 
+/* Swap the lists */
+void swap_list(Dlist *list1, Dlist *list2);
 
+/* Multiplication Operation */
+Status multiplication(Dlist *list1, Dlist *list2);
+
+/* Delete list*/
+Status delete_list(Dlist *list);
+
+/* add lists */
+Status add_lists(Dlist *list1, Dlist *list2);
+
+/* Division Operation */
+Status division(Dlist *list1, Dlist *list2, Dlist *result);
+
+/* Clear list */
+void clear_list(Dlist* list);
 
 #endif

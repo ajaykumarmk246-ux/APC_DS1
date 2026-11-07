@@ -1,110 +1,158 @@
 #include "apc.h"
 
-Status subtraction(Dlist **head1, Dlist **head2, Dlist **tail1, Dlist **tail2)
+Status subtraction(Dlist *list1, Dlist *list2, int print)
 {
-    int ret = list_compare(*head1,*head2);
+    int ret = list_compare(list1, list2);
     int sign = 1;
-    if(ret)
+
+    Dlist *big = list1;
+    Dlist *small = list2;
+
+    if (ret == SWAP)
     {
         sign = -1;
-        swap_list(head1,head2,tail1,tail2);
+        big = list2;
+        small = list1;
     }
-    int data,dataR,borrow= 0;
-    Dlist *temp1= *tail1;
-    Dlist *temp2= *tail2;
+    int data, dataR, borrow = 0;
 
-    Dlist *headR= NULL;
-    Dlist *tailR= NULL;
-    while(temp1 != NULL)
+    Calc *temp1 = big->tail;
+    Calc *temp2 = small->tail;
+
+    Dlist result = {NULL, NULL};
+
+    /* Perform subtraction from right to left */
+    while (temp1 != NULL)
     {
-        
-        if(temp2!= NULL)
+        if (temp2 != NULL)
         {
-            data= temp1->data-borrow;
-            if(data < temp2->data)
+            data = temp1->data - borrow;
+
+            if (data < temp2->data)
             {
-                borrow= 1;
-                data= data+10;
+                borrow = 1;
+                data = data + 10;
             }
             else
             {
-                borrow= 0;
+                borrow = 0;
             }
-            dataR= data - temp2->data;
-            temp2= temp2->prev;
+
+            dataR = data - temp2->data;
+            temp2 = temp2->prev;
         }
         else
         {
             data = temp1->data - borrow;
 
-            if(data< 0)
+            if (data < 0)
             {
-                borrow= 1;
-                dataR= data+10;
+                borrow = 1;
+                dataR = data + 10;
             }
             else
             {
-                borrow= 0;
-                dataR =data;
+                borrow = 0;
+                dataR = data;
             }
         }
-        insert_first(&headR,&tailR,dataR);
-        temp1= temp1->prev;
+
+        if (insert_first(&result, dataR) == e_failure)
+        {
+            printf("Error: Failed to insert digit during subtraction\n");
+            clear_list(&result);
+            return e_failure;
+        }
+
+        temp1 = temp1->prev;
     }
-    headR->data= headR->data*sign;
-    print_list(headR);
+    /* Remove leading zeroes */
+    remove_leading_zeroes(&result);
+
+    /* Apply negative sign to first digit */
+    if (result.head != NULL)
+    {
+        result.head->data = result.head->data * sign;
+    }
+
+    /* Free old list nodes */
+    clear_list(list1);
+
+    /* Transfer result to list1 */
+    list1->head = result.head;
+    list1->tail = result.tail;
+
+    if(print)
+    print_list(result.head);
+
+    /* Transfer ownership */
+    result.head = NULL;
+    result.tail = NULL;
+
+    return e_success;
 }
 
-int list_compare(Dlist *head1, Dlist *head2)
+
+int list_compare(Dlist *list1, Dlist *list2)
 {
-    int list1_count=0,list2_count=0;
-    Dlist *temp1= head1;
-    Dlist *temp2= head2;
-    while(temp1)
+    Calc *head1 = list1->head;
+    Calc *head2 = list2->head;
+
+    int list1_count = 0, list2_count = 0;
+
+    Calc *temp1 = head1;
+    Calc *temp2 = head2;
+
+    /* Traverse list1 */
+    while (temp1)
     {
         list1_count++;
-        temp1= temp1->next;
+        temp1 = temp1->next;
     }
-    while(temp2)
+
+    /* Traverse list2 */
+    while (temp2)
     {
         list2_count++;
-        temp2= temp2->next;
+        temp2 = temp2->next;
     }
-    if(list1_count > list2_count)
-    return 0;
-    else if(list1_count < list2_count)
-    return 1;
-    else if(list1_count == list2_count)
-    {
-       return data_compare(head1,head2);
-    }
+
+    if (list1_count > list2_count)
+        return NOSWAP;
+
+    else if (list1_count < list2_count)
+        return SWAP;
+
+    else                                        //if Both Operand's Digits are equal
+        return data_compare(head1, head2);
 }
 
-int data_compare(Dlist *head1,Dlist *head2)
+int data_compare(Calc *head1, Calc *head2)
 {
-    while(head1)
+    while (head1 != NULL && head2 != NULL)
     {
-        if(head1->data > head2->data)
-        return 0;
-        else if(head1->data < head2->data)
-        return 1;
-        else
-        {
-            head1= head1->next;
-            head2= head2->next;
-        }
+        if (head1->data > head2->data)
+            return NOSWAP;
+
+        else if (head1->data < head2->data)
+            return SWAP;
+
+        head1 = head1->next;
+        head2 = head2->next;
     }
-    return 0;
+
+    return NOSWAP;
 }
 
-void swap_list(Dlist **head1,Dlist **head2,Dlist **tail1,Dlist **tail2)
+void remove_leading_zeroes(Dlist* list)
 {
-    
-    Dlist *temp1= *head1;
-    *head1 = *head2;
-    *head2 = temp1;
+    while(list->head && list->head != list->tail && list->head->data == 0)
+    {
+        Calc * temp = list->head;
 
-    Dlist *temp2= *tail1;
-    *tail1 = *tail2;
-    *tail2 = temp2;
+        list->head = list->head->next;
+        list->head->prev = NULL;
+
+        free(temp);
+    }
 }

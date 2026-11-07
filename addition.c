@@ -1,15 +1,15 @@
 #include "apc.h"
 
-Status addition(Dlist **head1, Dlist **head2, Dlist **tail1, Dlist **tail2)
+int result_negative = 0;
+Status addition(Dlist *list1, Dlist *list2)
 {
-    Dlist *headR = NULL;
-    Dlist *tailR = NULL;
+    Dlist result = {NULL, NULL};
 
-    Dlist *temp1 = *tail1;
-    Dlist *temp2 = *tail2;
+    Calc *temp1 = list1->tail;
+    Calc *temp2 = list2->tail;
 
     int data, dataR;
-    int carry = 0;
+    int carry = 0;          //set carry to 0
 
     while(temp1 != NULL || temp2 != NULL)
     {
@@ -27,25 +27,32 @@ Status addition(Dlist **head1, Dlist **head2, Dlist **tail1, Dlist **tail2)
             temp2 = temp2->prev;
         }
 
-        dataR = data % 10;
-        carry = data / 10;
+        dataR = data % 10;              //extract last digit
+        carry = data / 10;              //Taking Carry
 
-        insert_first(&headR, &tailR, dataR);
+        if(insert_first(&result, dataR)== e_failure)
+        {
+            printf("Error: Failed to insert digit during addition\n");
+            return e_failure;
+        }
     }
 
     if(carry)
     {
-        insert_first(&headR, &tailR, carry);
+        insert_first(&result, carry);
     }
 
-    print_list(headR);
+    if(result_negative== 1)
+        printf("-");
+
+    print_list(result.head);
 
     return e_success;
 }
 
-Status insert_first(Dlist **head, Dlist **tail, int data)
+Status insert_first(Dlist *list, int data)
 {
-    Dlist *newNode = malloc(sizeof(Dlist));
+    Calc *newNode = malloc(sizeof(Calc));
     if(newNode == NULL)
     {
         printf("Memory allocation failed\n");
@@ -55,16 +62,16 @@ Status insert_first(Dlist **head, Dlist **tail, int data)
     newNode->prev = NULL;
     newNode->next = NULL;
 
-    if(*head == NULL)
+    if(list->head == NULL)
     {
-        *head= newNode;
-        *tail= newNode;
+        list->head= newNode;
+        list->tail= newNode;
         return e_success;
     }
 
-    newNode->next = *head;
-    (*head)->prev = newNode;
-    *head = newNode;
+    newNode->next = list->head;
+    list->head->prev = newNode;
+    list->head= newNode;
     return e_success;
 
 }
